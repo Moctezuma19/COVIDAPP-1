@@ -43,10 +43,10 @@ public class Usuario {
 	@Column(name = "cp", nullable = false, length = 5)
 	String cp;
 	
-	@Column(name = "pct", nullable = false)
+	@Column(name = "pct", nullable = true)
 	float pct;
 	
-	@Column(name = "pcg", nullable = false)
+	@Column(name = "pcg", nullable = true)
 	float pcg;
 
 	public int getId() {

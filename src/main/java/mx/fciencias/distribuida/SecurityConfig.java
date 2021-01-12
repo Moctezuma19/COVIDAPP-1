@@ -19,11 +19,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable().authorizeRequests()
-				.antMatchers("/","/registro", "/inicio", "/css/**", "/fonts/**", "/images/**",
+				.antMatchers("/","/registro","/registrarse","/exito", "/inicio", "/css/**", "/fonts/**", "/images/**",
 						"/js/**", "/favicon.ico","/iniciar-sesion")
 				.permitAll().anyRequest().authenticated().and().formLogin().loginPage("/iniciar-sesion")
 				.loginProcessingUrl("/iniciar-sesion").usernameParameter("correo").passwordParameter("password")
-				.defaultSuccessUrl("/principal").permitAll().and().logout()// logout configuration
+				.defaultSuccessUrl("/log/inicio").permitAll().and().logout()// logout configuration
 				.logoutUrl("/salir").deleteCookies("JSESSIONID").invalidateHttpSession(true)
 				.logoutSuccessUrl("/iniciar-sesion").permitAll();
 	}
