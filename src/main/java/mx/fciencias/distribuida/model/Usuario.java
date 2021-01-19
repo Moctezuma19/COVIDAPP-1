@@ -1,12 +1,20 @@
 package mx.fciencias.distribuida.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 //import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 @Table(name = "Usuario")
@@ -48,6 +56,38 @@ public class Usuario {
 	
 	@Column(name = "pcg", nullable = true)
 	float pcg;
+	
+	@OneToMany(mappedBy = "id_usuario", targetEntity = Contacto.class)
+	@LazyCollection(LazyCollectionOption.TRUE)
+	private List<Contacto> contactos = new ArrayList<>();
+	
+	@OneToOne(mappedBy = "id_usuario_c", targetEntity = Contacto.class)
+	@LazyCollection(LazyCollectionOption.TRUE)
+	private Contacto contacto = null;
+	
+	@OneToMany(mappedBy = "id_usuario", targetEntity = Notificacion.class)
+	@LazyCollection(LazyCollectionOption.TRUE)
+	private List<Notificacion> notificaciones = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "id_usuario_c", targetEntity = Notificacion.class)
+	@LazyCollection(LazyCollectionOption.TRUE)
+	private List<Notificacion> notificados = new ArrayList<>();
+
+	public Contacto getContacto() {
+		return contacto;
+	}
+
+	public void setContacto(Contacto contacto) {
+		this.contacto = contacto;
+	}
+
+	public List<Contacto> getContactos() {
+		return contactos;
+	}
+
+	public void setContactos(List<Contacto> contactos) {
+		this.contactos = contactos;
+	}
 
 	public int getId() {
 		return id;
@@ -143,6 +183,22 @@ public class Usuario {
 
 	public void setPcg(float pcg) {
 		this.pcg = pcg;
+	}
+
+	public List<Notificacion> getNotificaciones() {
+		return notificaciones;
+	}
+
+	public void setNotificaciones(List<Notificacion> notificaciones) {
+		this.notificaciones = notificaciones;
+	}
+
+	public List<Notificacion> getNotificados() {
+		return notificados;
+	}
+
+	public void setNotificados(List<Notificacion> notificados) {
+		this.notificados = notificados;
 	}
 	
 	
