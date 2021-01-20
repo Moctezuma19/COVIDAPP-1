@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class Controlador {
 
 	@Autowired
 	private ContactoRep contacto_bd;
-	
+
 	@Autowired
 	private NotificacionRep notificacion_bd;
 
@@ -193,12 +194,12 @@ public class Controlador {
 	}
 
 	@GetMapping("/log/notifica")
-	public String notificar(HttpServletRequest request,Principal principal) {
+	public String notificar(HttpServletRequest request, Principal principal) {
 		Usuario usuario = usuario_bd.findByCorreo(principal.getName());
 		ArrayList<Contacto> contactos = new ArrayList<>(usuario.getContactos());
-		for(Contacto c : contactos) {
+		for (Contacto c : contactos) {
 			System.out.println("pase");
-			if(c.getId_usuario_c() != null) {		
+			if (c.getId_usuario_c() != null) {
 				Notificacion n = new Notificacion();
 				n.setId_usuario(usuario);
 				n.setLeido(false);
@@ -208,34 +209,58 @@ public class Controlador {
 				notificacion_bd.save(n);
 			}
 		}
-		
+
 		return "redirect:/log/inicio";
 	}
-	
+
 	@ResponseBody
 	@PostMapping("/log/obtennotificaciones")
-	public Map<String,String> obten_notificaciones(HttpServletRequest request,Principal principal) {
+	public Map<String, String> obten_notificaciones(HttpServletRequest request, Principal principal) {
 		Usuario usuario = usuario_bd.findByCorreo(principal.getName());
 		ArrayList<Notificacion> notificaciones = new ArrayList<>(usuario.getNotificados());
 		HashMap<String, String> map = new HashMap<>();
-		if(notificaciones.size()==0) {
-			map.put("msg","error");
+		if (notificaciones.size() == 0) {
+			map.put("msg", "error");
 			return map;
 		}
-		
+
 		int i = 0;
-		for(Notificacion n : notificaciones) {
-			map.put("leido" + i, (n.isLeido())?"1":"0");
-			map.put("tipo" + i, (n.isTipo())?"1":"0");
+		for (Notificacion n : notificaciones) {
+			map.put("leido" + i, (n.isLeido()) ? "1" : "0");
+			map.put("tipo" + i, (n.isTipo()) ? "1" : "0");
 			Timestamp ts = new Timestamp(n.getTiempo_creado());
-			map.put("fecha" + i,ts.toString());
-			map.put("contacto" + i,n.getId_usuario().getNombre() + " " + n.getId_usuario().getApellido_paterno() + " " + n.getId_usuario().getApellido_materno());
+			map.put("fecha" + i, ts.toString());
+			map.put("contacto" + i, n.getId_usuario().getNombre() + " " + n.getId_usuario().getApellido_paterno() + " "
+					+ n.getId_usuario().getApellido_materno());
+			if (n.isLeido()) {
+				map.put("nid" + i, "-1");
+			} else {
+				map.put("nid" + i, String.valueOf(n.getId()));
+			}
+
 			i++;
-			n.setLeido(true);
-			notificacion_bd.save(n);//ya se va a leer
+			// n.setLeido(true);
+			notificacion_bd.save(n);// ya se va a leer
 		}
 		map.put("longitud", String.valueOf(i));
-		map.put("msg","ok");
+		map.put("msg", "ok");
+		return map;
+	}
+
+	@ResponseBody
+	@PostMapping("/log/leido")
+	public Map<String, String> leido(HttpServletRequest request) {
+		Enumeration<String> enumeration = request.getParameterNames();
+		while (enumeration.hasMoreElements()) {
+			String parameterName = enumeration.nextElement();
+			System.out.println("----::" + parameterName);
+			int id = Integer.parseInt(parameterName.substring(3));
+			Notificacion n = notificacion_bd.findById(id).get();
+			n.setLeido(true);
+			notificacion_bd.save(n);
+		}
+		HashMap<String, String> map = new HashMap<>();
+		map.put("msg", "ok");
 		return map;
 	}
 

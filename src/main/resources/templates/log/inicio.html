@@ -94,13 +94,13 @@
 						aria-labelledby="tab-acciones">
 						<br>
 						<form th:action="@{/log/notifica}" method="get">
-							<img width="10%" height="10%" src="../images/virus.png"> <input
-								type="hidden" value="1"> <input type="submit"
-								class="btn btn-outline-primary" name="status" value="¡Estoy contagiado!">
+							<img width="10%" height="10%" src="../images/virus.png">&nbsp;<input
+								type="hidden" name="status" value="1"> <input type="submit"
+								class="btn btn-outline-primary" value="¡Estoy contagiado!">
 						</form>
 
 						<form th:action="@{/log/notifica}" method="get">
-							<img width="10%" height="10%" src="../images/cardiograma.png">
+							<img width="10%" height="10%" src="../images/cardiograma.png">&nbsp;
 							<input type="hidden" value="0" name="status"> <input type="submit"
 								class="btn btn-outline-primary" value="¡Estoy recuperado!">
 						</form>
@@ -150,7 +150,7 @@
 
 					</div>
 					<div class="tab-pane fade" id="notificaciones" role="tabpanel"
-						aria-labelledby="tab-notificaciones">...</div>
+						aria-labelledby="tab-notificaciones"></div>
 				</div>
 			</div>
 			<div class="col"></div>
@@ -158,6 +158,29 @@
 	</div>
 	<script src="../js/jquery-3.5.1.min.js"></script>
 	<script>
+	
+		function lea(){
+
+			$("#tab-notificaciones").click(function(){
+				var json = {};
+				if($("#notificaciones table").length){
+					var i = 0;
+					$("td[id^='nid']").each(function(){
+						var nid = $(this).attr("id");
+						if(nid == "nid-1"){
+							return;	
+						}
+						json[nid] = nid;
+						i++;
+					});
+					console.log(json);
+					$.post("http://localhost:8080/inicio/log/leido",json,function(data){
+						$(".badge").text("0");
+					});
+				}
+				
+			});
+		}
 		function obten_notificaciones(){
 			console.log("pase");
 			$.post("http://localhost:8080/inicio/log/obtennotificaciones",function(data){
@@ -169,12 +192,14 @@
 				var leer = 0;
 					var etiqueta = "<table class ='table'><thead><tr><th scope='col'>Contacto</th><th scope='col'>Estado</th><th scope='col'>Fecha</th><th scope='col'>Leido</th></tr></thead><tbody>";
 					for(var i = 0; i < parseInt(data["longitud"]); i++){
+						console.log("---" + data["tipo0"]);
 						var estado = (data["tipo" + i] == "1")?"contagiado":"recuperado";
+						console.log("estado -- " + estado);
 						var leido = (data["leido" + i] == "0")?"<b>No</b>":"Sí";
 						if(data["leido" + i] == "0"){
 							leer++;	
 						}
-						etiqueta +="<tr><td>" + data["contacto" + i] + "</td><td>" + estado + "</td><td>" + data["fecha" + i] + "</td><td>" + leido + "</td><tr>";
+						etiqueta +="<tr><td>" + data["contacto" + i] + "</td><td>" + estado + "</td><td>" + data["fecha" + i] + "</td><td id='nid" + data["nid" + i]+ "'>" + leido + "</td><tr>";
 					}
 					etiqueta +="</tbody><table>";
 					$("#notificaciones").append(etiqueta);
@@ -186,8 +211,9 @@
 				
 					
 						function() {
+							lea();
 							obten_notificaciones();
-							setInterval(obten_notificaciones,3000);
+							setInterval(obten_notificaciones,15000);
 							$("#buscar")
 									.click(
 											function() {
