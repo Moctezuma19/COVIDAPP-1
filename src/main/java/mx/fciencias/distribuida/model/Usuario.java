@@ -57,6 +57,9 @@ public class Usuario {
 	@Column(name = "pcg", nullable = true)
 	float pcg;
 	
+	@Column(name = "contagiado",nullable = false)
+	boolean contagiado;
+	
 	@OneToMany(mappedBy = "id_usuario", targetEntity = Contacto.class)
 	@LazyCollection(LazyCollectionOption.TRUE)
 	private List<Contacto> contactos = new ArrayList<>();
@@ -199,6 +202,14 @@ public class Usuario {
 
 	public void setNotificados(List<Notificacion> notificados) {
 		this.notificados = notificados;
+	}
+
+	public boolean isContagiado() {
+		return contagiado;
+	}
+
+	public void setContagiado(boolean contagiado) {
+		this.contagiado = contagiado;
 	}
 	
 	

@@ -76,8 +76,13 @@ public class Controlador {
 					Usuario aux = usuario_bd.findById(c.getId_usuario_c().getId()).get();
 					c.setNombre(aux.getNombre() + " " + aux.getApellido_paterno() + " " + aux.getApellido_materno());
 					c.setEdad(aux.getEdad());
-					c.setPcg(0.0f);
-					c.setPct(0.0f);
+					if(aux.isContagiado()) {
+						c.setPcg(1.0f);
+					} else {
+						c.setPcg(0.0f);//calcular su probabilidad de contagio, no tomar en cuenta al propio usuario
+					}
+					//c.setPcg(0.0f);
+					c.setPct(0.0f);//esto debe ser editable
 					c.setSexo(aux.getSexo());
 				}
 			}
@@ -86,22 +91,21 @@ public class Controlador {
 			}
 			pcg /= contactos.size();
 			String txt = "";
-			String color = "";
+			int color = 0;
 			if (pcg < 0.25f) {
 				txt = "Estas lejos de contagiarte pero manten precauciones.";
-				color = "green";
 			} else if (pcg >= 0.25f && pcg <= 0.5f) {
 				txt = "Es un volado contagiarte, pon mas atencion";
-				color = "orange";
+				color = 1;
 			} else {
 				txt = "Es muy probable que te contagies, sera mejor no tener contacto con alguien";
-				color = "red";
+				color = 2;
 			}
 			model.addAttribute("lleno", true);
 			model.addAttribute("contactos", contactos);
 			model.addAttribute("pcg", pcg);
 			model.addAttribute("pcgtxt", txt);
-			model.addAttribute("color", color);
+			model.addAttribute("color",color);
 		}
 
 		return "log/inicio";
@@ -148,7 +152,9 @@ public class Controlador {
 		c.setId_usuario(usuario);
 		if (!request.getParameter("uid").equals("0")) {
 			Usuario user = usuario_bd.findById(Integer.parseInt(request.getParameter("uid"))).get();
+			float pct = Float.parseFloat(request.getParameter("pct"));
 			c.setId_usuario_c(user);
+			c.setPct(pct);
 			contacto_bd.save(c);
 
 			Contacto c2 = new Contacto();
@@ -196,6 +202,9 @@ public class Controlador {
 	@GetMapping("/log/notifica")
 	public String notificar(HttpServletRequest request, Principal principal) {
 		Usuario usuario = usuario_bd.findByCorreo(principal.getName());
+		usuario.setContagiadio(true);
+		usuario.setPcg(1.0f);
+		usuario_bd.save(usuario);//revisar la linea anterior y esta
 		ArrayList<Contacto> contactos = new ArrayList<>(usuario.getContactos());
 		for (Contacto c : contactos) {
 			System.out.println("pase");
