@@ -76,13 +76,13 @@ public class Controlador {
 					Usuario aux = usuario_bd.findById(c.getId_usuario_c().getId()).get();
 					c.setNombre(aux.getNombre() + " " + aux.getApellido_paterno() + " " + aux.getApellido_materno());
 					c.setEdad(aux.getEdad());
-					if(aux.isContagiado()) {
+					if (aux.isContagiado()) {
 						c.setPcg(1.0f);
 					} else {
-						c.setPcg(0.0f);//calcular su probabilidad de contagio, no tomar en cuenta al propio usuario
+						c.setPcg(0.0f);// calcular su probabilidad de contagio, no tomar en cuenta al propio usuario
 					}
-					//c.setPcg(0.0f);
-					c.setPct(0.0f);//esto debe ser editable
+					// c.setPcg(0.0f);
+					//c.setPct(0.0f);// esto debe ser editable
 					c.setSexo(aux.getSexo());
 				}
 			}
@@ -105,7 +105,7 @@ public class Controlador {
 			model.addAttribute("contactos", contactos);
 			model.addAttribute("pcg", pcg);
 			model.addAttribute("pcgtxt", txt);
-			model.addAttribute("color",color);
+			model.addAttribute("color", color);
 		}
 
 		return "log/inicio";
@@ -202,9 +202,9 @@ public class Controlador {
 	@GetMapping("/log/notifica")
 	public String notificar(HttpServletRequest request, Principal principal) {
 		Usuario usuario = usuario_bd.findByCorreo(principal.getName());
-		usuario.setContagiadio(true);
+		usuario.setContagiado(true);
 		usuario.setPcg(1.0f);
-		usuario_bd.save(usuario);//revisar la linea anterior y esta
+		usuario_bd.save(usuario);// revisar la linea anterior y esta
 		ArrayList<Contacto> contactos = new ArrayList<>(usuario.getContactos());
 		for (Contacto c : contactos) {
 			System.out.println("pase");
@@ -267,6 +267,25 @@ public class Controlador {
 			Notificacion n = notificacion_bd.findById(id).get();
 			n.setLeido(true);
 			notificacion_bd.save(n);
+		}
+		HashMap<String, String> map = new HashMap<>();
+		map.put("msg", "ok");
+		return map;
+	}
+
+	@ResponseBody
+	@PostMapping("/log/actualiza")
+	public Map<String, String> actualiza_contacto(HttpServletRequest request) {
+		request.getParameter("tipo");
+		Contacto c = contacto_bd.findById(Integer.parseInt(request.getParameter("id"))).get();
+		c.setPct(Float.parseFloat(request.getParameter("pct")));
+		if(request.getParameter("tipo").equals("usuario")) {
+			contacto_bd.save(c);
+		} else {
+			c.setEdad(Integer.parseInt(request.getParameter("edad")));
+			c.setSexo(request.getParameter("sexo"));
+			c.setPcg(Float.parseFloat(request.getParameter("pcg")));
+			contacto_bd.save(c);
 		}
 		HashMap<String, String> map = new HashMap<>();
 		map.put("msg", "ok");

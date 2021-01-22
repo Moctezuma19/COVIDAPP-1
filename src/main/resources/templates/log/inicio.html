@@ -180,7 +180,51 @@
 
 					</div>
 					<div class="tab-pane fade" id="edita" role="tabpanel"
-						aria-labelledby="tab-edita">Esta sección esta en desarrollo.</div>
+						aria-labelledby="tab-edita">
+						<div id="mensajeact"></div>
+						<div th:if="${lleno}">
+							<table class="table">
+								<thead>
+									<tr>
+										<th scope="col">Nombre</th>
+										<th scope="col">Edad</th>
+										<th scope="col">Sexo</th>
+										<th scope="col">PCT</th>
+										<th scope="col">PCG</th>
+										<th scope="col"></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="contacto : ${contactos}">
+										<td th:text="${contacto.nombre}"></td>
+										<td><span th:if="${contacto.id_usuario_c}"
+											th:text="${contacto.edad}"></span><input
+											th:unless="${contacto.id_usuario_c}" type="number"
+											style="width: 50px;" min="0" th:value="${contacto.edad}"></td>
+										<td><span th:if="${contacto.id_usuario_c}"
+											th:text="${contacto.sexo}"></span><input
+											th:unless="${contacto.id_usuario_c}" type="text" size="1"
+											maxlength="1" th:value="${contacto.sexo}"></td>
+										<td><input type="number" style="width: 50px;" step="0.01"
+											th:value="${contacto.pct}"></td>
+										<td><span th:if="${contacto.id_usuario_c}"
+											th:text="${contacto.pcg}"></span><input
+											th:unless="${contacto.id_usuario_c}" type="number"
+											style="width: 50px;" step="0.01" th:value="${contacto.pcg}"></td>
+										<td style="display: none"><input
+											th:if="${contacto.id_usuario_c}" type="hidden"
+											class="usuario" th:value="${contacto.id}">
+											<input th:unless="${contacto.id_usuario_c}" type="hidden"
+											class="contacto" th:value="${contacto.id}"></td>
+										<td><button class="btn btn-success actualiza" type="button">actualizar</button></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div th:unless="${lleno}">
+							<strong>No hay contactos que mostrar.</strong>
+						</div>
+					</div>
 					<div class="tab-pane fade" id="notificaciones" role="tabpanel"
 						aria-labelledby="tab-notificaciones"></div>
 				</div>
@@ -257,6 +301,32 @@
 				.ready(
 
 						function() {
+							$(".actualiza").click(function(){
+								var json = {};
+								var pct = $(this).parent().prev().prev().prev().find("input").val();
+								json["id"] = $(this).parent().prev().find("input").val();
+								json["pct"] = pct;
+								
+								if($(this).parent().prev().find("input").hasClass("usuario")){				
+									json["tipo"] = "usuario";	
+								} else {
+									json["tipo"] = "contacto";
+									var edad = $(this).parent().prev().prev().prev().prev().prev().find("input").val();
+									var sexo = $(this).parent().prev().prev().prev().prev().find("input").val();
+									var pcg = $(this).parent().prev().prev().find("input").val();
+									console.log(edad + ","+ sexo + "," + pcg);
+									json["edad"] = edad;
+									json["sexo"] = sexo;
+									json["pcg"] = pcg;
+								}
+								
+								$.post("http://localhost:8080/inicio/log/actualiza",json,function(data){
+									location.reload();
+									//$("#mensajeact").append("<div class='alert alert-info alert-dismissible fade show' role='alert'>Contacto actualizado.<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>");
+								});
+								
+							
+							});
 							lea();
 							obten_notificaciones();
 							setInterval(obten_notificaciones, 15000);
